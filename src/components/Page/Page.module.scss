@@ -1,0 +1,15 @@
+.mainPage {
+  width: 100vw !important;
+}
+@media (min-width: 768px) {
+  .mainPage {
+    width: calc(100vw - 24rem) !important;
+  }
+  .MainPageClosedSideNav {
+    width: 100vw !important;
+  }
+  
+  .mainPage.noSideNav {
+    width: calc(100vw - 4rem) !important;
+  }
+}

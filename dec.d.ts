@@ -1,0 +1,1 @@
+export declare module 'tw-elements/dist/src/js/bs/src/alert';

@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useState } from 'react';
 import { Navigate, Route, Routes, useParams } from 'react-router-dom';
 import './App.css';
 import MainNavigationView from './components/MainNavigationView/MainNavigationView';
@@ -8,6 +8,9 @@ import Dashboard from './pages/Dashboard/Dashboard.lazy';
 import RegisterInventoryPage from './pages/InventoriesPage/RegisterInventoryPage/RegisterInventoryPage.lazy';
 import { InventoriesGroupsSubNavigation, InventoriesListingsSubNavigation, InventoriesSubNavigation } from './components/InventoriesSubNavigation/InventoriesSubNavigation';
 import OrdersNavigation from './components/MainNavigationView/InventoryNavigation/OrdersNavigation';
+import AssetsNavigation from './components/MainNavigationView/InventoryNavigation/AssetsNavigation';
+import FinanceNavigation from './components/MainNavigationView/FinanceNavigation/InventoryNavigation.lazy';
+import UsersNavigation from './components/MainNavigationView/UsersNavigation/UsersNavigation.lazy';
 const Redirect: FC<{ to: string }> = (props) => {
   return <Navigate to={`/${useParams().entityId + props.to}`} replace />
 }
@@ -26,12 +29,7 @@ function App() {
       setMobile(false);
     }
     // setWindowWidth(window.innerWidth);
-
   }
-  useEffect(() => {
-
-
-  }, [])
   return (
     <div data-mode="dark">
       <div className="App flex flex-grow h-full bg-neutral-100 dark:bg-neutral-800">
@@ -49,16 +47,14 @@ function App() {
               <Route path={"*"} element={<InventoriesSubNavigation />} />
             </Route>
 
-            <Route path={"/:entityId/orders"} element={<OrdersNavigation isMobile={mobile} sideNavOpenState={[sideNavOpen, setSideNavOpen]} />} >
-              <Route element={<Redirect to={"/orders/all"} />} index />
-              <Route path={'/:entityId/orders/all'} element={<InventoriesSubNavigation />} />
-              <Route path={'/:entityId/orders/groups'} element={<InventoriesGroupsSubNavigation />} />
-              <Route path={'/:entityId/orders/listings'} >
-                <Route element={<Redirect to={"/orders/listings/0"} />} index />
-                <Route path={'/:entityId/orders/listings/0'} element={<InventoriesListingsSubNavigation />} />
-              </Route>
-              <Route path={"*"} element={<InventoriesSubNavigation />} />
-            </Route>
+            <Route path={"/:entityId/orders"} element={<OrdersNavigation isMobile={mobile} sideNavOpenState={[sideNavOpen, setSideNavOpen]} />} />
+            <Route path={"/:entityId/orders/*"} element={<OrdersNavigation isMobile={mobile} sideNavOpenState={[sideNavOpen, setSideNavOpen]} />} />
+            <Route path={"/:entityId/assets"} element={<AssetsNavigation isMobile={mobile} sideNavOpenState={[sideNavOpen, setSideNavOpen]} />} />
+            <Route path={"/:entityId/assets/*"} element={<AssetsNavigation isMobile={mobile} sideNavOpenState={[sideNavOpen, setSideNavOpen]} />} />
+            <Route path={"/:entityId/finances"} element={<FinanceNavigation isMobile={mobile} sideNavOpenState={[sideNavOpen, setSideNavOpen]} />} />
+            <Route path={"/:entityId/finances/*"} element={<FinanceNavigation isMobile={mobile} sideNavOpenState={[sideNavOpen, setSideNavOpen]} />} />
+            <Route path={"/:entityId/users"} element={<UsersNavigation isMobile={mobile} sideNavOpenState={[sideNavOpen, setSideNavOpen]} />} />
+            <Route path={"/:entityId/users/*"} element={<UsersNavigation isMobile={mobile} sideNavOpenState={[sideNavOpen, setSideNavOpen]} />} />
 
             {/* <Route path={"/:entityId/inventories"} >
               <Route element={<Redirect to={"/inventories/all"} />} index />

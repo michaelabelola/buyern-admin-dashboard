@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 import { FiBox } from 'react-icons/fi';
-import { Location, NavLink, useParams } from 'react-router-dom';
+import { NavLink, useParams } from 'react-router-dom';
 import { InventoryListing } from '../../Models/Listing';
 
 

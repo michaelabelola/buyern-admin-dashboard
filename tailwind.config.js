@@ -8,7 +8,7 @@ module.exports = {
     extend: {
       colors: {
         'primary': colors.neutral,
-        'secondary': colors.fuchsia
+        'secondary': colors.gray
       },
       spacing: {
         '112': '28rem',

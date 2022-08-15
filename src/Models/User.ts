@@ -1,15 +1,14 @@
-import { Location } from "./Location";
-
-interface User{
-uid?:string;
-firstName?:string;
-lastName?:string;
-email?:string;
-phone?:string;
-address?:string;
-rating?:number;
-location?: Location;
-status?:string;
-workStatus?:string;
+interface User {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  dob: Date;
+  address: string;
+  address2: string;
+  state: number;
+  country: number;
+  timeRegistered: Date;
 }
 export type {User};

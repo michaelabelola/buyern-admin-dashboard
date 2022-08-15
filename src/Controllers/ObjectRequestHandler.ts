@@ -6,6 +6,7 @@ enum RequestStatus {
   SUCCESSFUL = 3,
   FAILED = 4,
   CONCLUDED = 5,
+  WARNING = 6,
 }
 
 interface ObjectRequestHandler<T> {
@@ -26,5 +27,11 @@ interface ObjectRequestHandler<T> {
   updateOne: (id?: string | number, object?: T) => T;
 }
 
+class RequestStatusHandler {
+  status: RequestStatus;
+  constructor(_status:RequestStatus) {
+    this.status = _status;
+  }
+}
 export type { ObjectRequestHandler };
-export { RequestStatus };
+export { RequestStatus, RequestStatusHandler };

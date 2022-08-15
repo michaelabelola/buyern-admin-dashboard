@@ -3,7 +3,7 @@ import { Dialog, Transition } from '@headlessui/react'
 import { Fragment } from 'react'
 import { RequestStatus } from '../../Controllers/ObjectRequestHandler';
 import { TransparentButton } from '../Button/Button';
-import { FaCaretRight, FaCheck, FaPlus, FaSpinner } from 'react-icons/fa';
+import { FaCaretRight, FaCheck, FaExclamation, FaPlus, FaSpinner } from 'react-icons/fa';
 import ProgressStepMonitor from '../ProgressStepMonitor';
 
 
@@ -175,7 +175,6 @@ const NotificationModal: FC<NotificationModalProps> = (props) => {
     </Transition>
   )
 };
-
 export default Modal;
 export type { ModalProps, NotificationStep };
-export { NotificationModal };
+export { NotificationModal }

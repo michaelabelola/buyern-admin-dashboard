@@ -209,7 +209,7 @@ const TitleView: FC<TitleViewProps> = (props) => {
 }
 
 const FormLabel: FC<{ children?: any; }> = (props) => (
-  <label className="form-label inline-block mb-1 text-primary-700 font-semibold capitalize">
+  <label className="form-label inline-block mb-1 w-fit text-primary-700 font-semibold capitalize">
     {props.children}
   </label>
 );

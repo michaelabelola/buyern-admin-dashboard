@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useState } from 'react';
 import { FaTrashAlt } from 'react-icons/fa';
 import { FiPlus } from 'react-icons/fi';
 import { useParams } from 'react-router-dom';
@@ -213,9 +213,11 @@ const RegisterInventoryPage: FC<RegisterInventoryPageProps> = (props) => {
   const fetchSubCategories = (categoryId: number) => {
     InventorySubCategoryController(entityId).fetchAllByCategoryId(categoryId, subCategoryRequestTracker).then((value: InventorySubCategory[]) => { setInventorySubCategories(value); if (value) setSelectedSubInventoryCategoryId(value[0] ? value[0].id : undefined as any) }, (reason: any) => { console.log(reason); setSelectedSubInventoryCategoryId(undefined as any) });
   }
-  useEffect(() => {
-    fetchCategories()
-  }, [])
+
+  fetchCategories();
+  // useEffect(() => {
+  //   fetchCategories()
+  // }, [])
 
   return (
     <Page {...props}>
@@ -223,7 +225,7 @@ const RegisterInventoryPage: FC<RegisterInventoryPageProps> = (props) => {
         <div className="flex box-border overflow-x-clip w-full justify-center px-2">
           <form className="lg:full xl:w-[30vw] lg:w-8/12 md:w-8/12 w-full px-16 md:px-4 justify-center" onSubmit={() => (false)}>
             <div className=' mt-4'>
-            <Header>Register Inventory</Header>
+              <Header>Register Inventory</Header>
             </div>
             <div className="mb-3 w-full xl:w-full flex flex-col gap-4 justify-center items-baseline">
               <TitleView titlestyle={1}>Details</TitleView>

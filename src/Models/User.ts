@@ -1,3 +1,5 @@
+import { City, Country, State } from "./Location";
+
 interface User {
   id: number;
   firstName: string;
@@ -7,8 +9,9 @@ interface User {
   dob: Date;
   address: string;
   address2: string;
-  state: number;
-  country: number;
+  city: City;
+  state: State;
+  country: Country;
   timeRegistered: Date;
 }
 export type {User};

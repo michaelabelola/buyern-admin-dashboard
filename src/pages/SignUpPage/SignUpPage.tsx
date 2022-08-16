@@ -1,4 +1,5 @@
-import React, { FC, useState } from 'react';
+import axios, { AxiosResponse } from 'axios';
+import React, { FC, useEffect, useState } from 'react';
 import { FaSignInAlt } from 'react-icons/fa';
 import BorderedDiv from '../../components/BorderedDiv';
 import Button from '../../components/Button/Button2';
@@ -7,10 +8,105 @@ import Card from '../../components/Card/Card.lazy';
 import FormControl2, { FormInput2, FormSelect, FieldState } from '../../components/FormControl/FormControl2';
 import StateModal from '../../components/Modal/StateModal';
 import { RequestStatus } from '../../Controllers/ObjectRequestHandler';
+import { City, Country, State } from '../../Models/Location';
+import { ResponseDTO } from '../../Models/ResponseDTO';
+import { User } from '../../Models/User';
 
 interface SignUpPageProps { }
 
 const SignUpPage: FC<SignUpPageProps> = () => {
+
+  let cities = {
+    dataState: useState([] as City[]),
+    fetch: (stateId?: number) => {
+      if (!stateId) {
+        fields.state.fieldState[1](FieldState.DEFAULT);
+        return;
+      }
+      fields.city.fieldState[1](FieldState.PROCESSING)
+      axios({ url: `${process.env.REACT_APP_BASEURL}/helper/cities/byStateId?stateId=${stateId}` })
+        .then((value: AxiosResponse<any, any>) => {
+          let response: ResponseDTO<City[]> = value.data;
+          if (response.code !== "00") {
+            fields.city.fieldState[1](FieldState.INVALID);
+            return;
+          }
+          if (response.data.length !== 0) {
+            cities.dataState[1](response.data);
+            fields.city.value[1]({ id: response.data[0].id, value: response.data[0].name })
+          } else {
+            cities.dataState[1]([]);
+            fields.city.value[1]({ id: 0, value: "no cities" })
+          }
+          fields.city.fieldState[1](FieldState.VALID);
+        })
+        .catch((reason: any) => {
+          console.log(reason);
+          fields.city.fieldState[1](FieldState.INVALID);
+        });
+    }
+  }
+  let states = {
+    dataState: useState([] as State[]),
+    fetch: (countryId: number) => {
+      fields.state.fieldState[1](FieldState.PROCESSING)
+      cities.dataState[1]([]);
+      fields.city.value[1]({ id: -1, value: "loading ...." })
+      fields.city.fieldState[1](FieldState.WARNING);
+      axios({ url: `${process.env.REACT_APP_BASEURL}/helper/states/byCountryId?countryId=${countryId}` })
+        .then((value: AxiosResponse<any, any>) => {
+          let response: ResponseDTO<State[]> = value.data;
+          if (response.code !== "00") {
+            fields.state.fieldState[1](FieldState.INVALID);
+            return;
+          }
+          states.dataState[1](response.data);
+          if (response.data.length !== 0) {
+            states.dataState[1](response.data)
+            fields.state.value[1]({ id: response.data[0].id, value: response.data[0].name })
+            cities.fetch(response.data[0].id);
+          } else {
+            states.dataState[1]([])
+            cities.dataState[1]([]);
+            fields.state.value[1]({ id: 0, value: "no states" })
+            fields.city.value[1]({ id: 0, value: "no cities" })
+          }
+          fields.state.fieldState[1](FieldState.VALID);
+        })
+        .catch((reason: any) => {
+          fields.state.fieldState[1](FieldState.INVALID);
+          console.log(reason);
+        });
+    }
+  }
+  let countries = {
+    dataState: useState([] as Country[]),
+    fetch: () => {
+      fields.country.fieldState[1](FieldState.PROCESSING);
+      states.dataState[1]([])
+      cities.dataState[1]([]);
+      fields.state.fieldState[1](FieldState.WARNING);
+      fields.city.fieldState[1](FieldState.WARNING);
+      fields.state.value[1]({ id: -1, value: "loading ...." })
+      fields.city.value[1]({ id: -1, value: "loading ...." })
+      axios({ url: `${process.env.REACT_APP_BASEURL}/helper/countries` })
+        .then((value: AxiosResponse<any, any>) => {
+          let response: ResponseDTO<Country[]> = value.data;
+          if (response.code !== "00") {
+            fields.country.fieldState[1](FieldState.INVALID);
+            return;
+          }
+          countries.dataState[1](response.data);
+          fields.country.value[1]({ id: response.data[159].id, value: response.data[159].name })
+          fields.country.fieldState[1](FieldState.VALID);
+          states.fetch(response.data[159].id);
+        })
+        .catch((reason: any) => {
+          fields.country.fieldState[1](FieldState.INVALID);
+          console.log(reason);
+        });
+    }
+  }
   const fields = {
     firstName: {
       message: useState("" as any),
@@ -82,7 +178,8 @@ const SignUpPage: FC<SignUpPageProps> = () => {
       }
     },
     gender: {
-      value: useState(1) as any,
+      options: [{ id: 0, value: "Male" }, { id: 1, value: "Female" }, { id: 1, value: "Rather Not Say" }],
+      value: useState({ id: 0, value: "Male" }) as any,
       fieldState: useState(FieldState.DEFAULT)
     },
     dob: {
@@ -153,19 +250,26 @@ const SignUpPage: FC<SignUpPageProps> = () => {
           fields.image.fieldState[1](FieldState.INVALID);
           return false;
         }
-        if (!ev.currentTarget.files || !ev.currentTarget.files[0]) {
+        if (ev && ev.currentTarget) {
           fields.image.message[1]("No image selected");
+          fields.image.fieldState[1](FieldState.INVALID);
+        } else if (newValue && !ev && (fields.image.message[0] === undefined || fields.image.message[0] === "")) {
+          return true;
+        } else {
+          return false;
+        }
+        if (ev.currentTarget.files && (ev.currentTarget.files[0].type !== "image/jpeg" && ev.currentTarget.files[0].type !== "image/jpg" && ev.currentTarget.files[0].type !== "image/png")) {
+          fields.image.message[1]("Unsupported format. only image/jpeg or image/png are supported");
           fields.image.fieldState[1](FieldState.INVALID);
           return false;
-        } else if (ev.currentTarget.files[0].type !== "image/jpeg" && ev.currentTarget.files[0].type !== "image/png") {
-          fields.image.message[1]("No image selected");
-          fields.image.fieldState[1](FieldState.INVALID);
         }
-        fields.image.file = ev.currentTarget.files[0] as any;
-        console.log(fields.image.file);
+        if (ev.currentTarget.files) {
 
-        fields.image.message[1](undefined);
-        fields.image.fieldState[1](FieldState.VALID);
+          fields.image.file = ev.currentTarget.files[0] as any;
+          // console.log(fields.image.file);
+          fields.image.message[1](undefined);
+          fields.image.fieldState[1](FieldState.VALID);
+        }
         return true;
       }
     },
@@ -193,16 +297,27 @@ const SignUpPage: FC<SignUpPageProps> = () => {
       }
     },
     state: {
-      value: useState(0) as any,
+      value: useState(undefined as any),
       fieldState: useState(FieldState.DEFAULT),
+      options: states.dataState[0].map((state: State, index: number, array: State[]) => ({ id: state.id, value: state.name })),
+      onChange: (option: any) => {
+        console.log(option.id);
+        cities.fetch(option.id)
+      }
     },
     city: {
-      value: useState(0) as any,
+      value: useState(undefined as any),
       fieldState: useState(FieldState.DEFAULT),
+      options: cities.dataState[0].map((city: City, index: number, array: City[]) => ({ id: city.id, value: city.name }))
     },
     country: {
-      value: useState(0) as any,
+      value: useState(undefined as any),
       fieldState: useState(FieldState.DEFAULT),
+      options: countries.dataState[0].map((country: Country, index: number, array: Country[]) => ({ id: country.id, value: country.name })),
+      onChange: (option: any) => {
+        console.log(option);
+        states.fetch(option.id)
+      }
     },
   }
   function yearsDiff(d1: Date, d2: Date) {
@@ -216,18 +331,16 @@ const SignUpPage: FC<SignUpPageProps> = () => {
     let date2 = new Date(d2);
     let years = yearsDiff(d1, d2);
     let months = (years * 12) + (date2.getMonth() - date1.getMonth());
-    console.log(months);
     return months;
   }
   const stateModal = new StateModal(useState(false), useState(RequestStatus.IDLE as RequestStatus), useState("" as any));
   const submitForm = () => {
     registerAccount();
-    stateModal.setStatus(RequestStatus.PROCESSING, "Registering User", true);
-    setTimeout(() => {
-      stateModal.setStatus(RequestStatus.SUCCESSFUL, "User Registered Sucessfully", true, -1);
-    }, 5000);
+    // stateModal.setStatus(RequestStatus.PROCESSING, "Registering User", true);
+    // setTimeout(() => {
+    //   stateModal.setStatus(RequestStatus.SUCCESSFUL, "User Registered Sucessfully", true, -1);
+    // }, 5000);
   }
-
   const registerAccount = () => {
     let fieldKeys = Object.keys(fields);
     let isReady: boolean = true;
@@ -237,26 +350,43 @@ const SignUpPage: FC<SignUpPageProps> = () => {
         console.log(fieldKey);
       }
     });
-console.log(isReady);
+    console.log(isReady);
+    if (!isReady) return;
+    let user: User = {
+      firstName: fields.firstName.value[0],
+      lastName: fields.lastName.value[0],
+      email: fields.email.value[0],
+      phone: fields.phone.value[0],
+      dob: new Date(fields.dob.value[0]),
+      address: fields.address.value[0],
+      address2: fields.address2.value[0],
+      city: { id: fields.city.value[0].id, name: fields.city.value[0].value},
+      state: { id: fields.state.value[0].id, name: fields.state.value[0].value },
+      country: { id: fields.country.value[0].id, name: fields.country.value[0].value },
+    } as User;
+    console.log(user);
 
-    // axios({
-    //   method: 'post',
-    //   url: `${process.env.REACT_APP_BASEURL}/user`,
-    //   data: {
-    //     firstName: 'Fred',
-    //     lastName: 'Flintstone'
-    //   }
-    // })
-    //   .then((value: AxiosResponse<any, any>) => {
+    axios({
+      method: "post",
+      url: `${process.env.REACT_APP_BASEURL}/user`,
+      data: user,
+    })
+      .then((value: AxiosResponse<any, any>) => {
+        console.log(value);
+      })
+      .catch((reason: any) => {
+        console.log(reason);
+      });
 
-    //   })
-    //   .catch((reason: any) => {
-
-    //   });
   }
+  useEffect(() => {
+    if (countries.dataState[0] === undefined || countries.dataState[0].length < 1) {
+      countries.fetch();
+    }
+  }, [])
 
   return (
-    <div className='min-h-screen w-screen flex items-center justify-center overflow-hidden'>
+    <div className='min-h-screen w-screen flex items-center justify-center overflow-hidden bg-white'>
       <div className={"w-screen h-screen opacity-70 scale-110 blur grayscale brightness-50"}><img src='http://127.0.0.1:10000/devstoreaccount1/test/bg%2FBojoRiver_ROW2280567335_1920x1080.jpg' className={"w-full h-full object-cover"} alt='bg' /></div>
       <Card classNames={"w-[80%] sm:w-[60%] md:w-[50%] lg:w-[45%] xl:w-[40%] 2xl:w-[35%] absolute"} childClassNames={"p-10 h-fit max-h-[95vh]"}>
         <div className={"flex justify-center mb-8"}>
@@ -293,10 +423,7 @@ console.log(isReady);
                 {/* {nameError ? <FormError>{nameError}</FormError> : ""} */}
               </FormControl2>
               <FormControl2 state={fields.gender} label={"* Gender"}>
-                <FormSelect state={fields.gender} options={[
-                  { id: 0, value: "Male" },
-                  { id: 1, value: "Female" }
-                ]} />
+                <FormSelect state={fields.gender} />
               </FormControl2>
               <FormControl2 state={fields.password} label={"* Password"}>
                 <FormInput2 state={fields.password} placeholder="Password" type={"password"} required />
@@ -314,37 +441,13 @@ console.log(isReady);
                 <FormInput2 state={fields.address2} placeholder="address 2" />
               </FormControl2>
               <FormControl2 state={fields.country} label={"* Country"}>
-                <FormSelect state={fields.country} options={[
-                  { id: 0, value: "Nigeria" },
-                  { id: 1, value: "Ghana" },
-                  { id: 2, value: "SA" },
-                  { id: 3, value: "Cameroon" },
-                  { id: 4, value: "India" },
-                  { id: 5, value: "Russia" },
-                  { id: 6, value: "Germany" }
-                ]} />
+                <FormSelect state={fields.country} />
               </FormControl2>
               <FormControl2 state={fields.state} label={"* State"}>
-                <FormSelect state={fields.state} options={[
-                  { id: 0, value: "Lagos" },
-                  { id: 1, value: "Abuja" },
-                  { id: 2, value: "Ogun" },
-                  { id: 3, value: "Ekiti" },
-                  { id: 4, value: "Kano" },
-                  { id: 5, value: "Kaduna" },
-                  { id: 6, value: "Edo" }
-                ]} />
+                <FormSelect state={fields.state} />
               </FormControl2>
               <FormControl2 state={fields.city} label={"* City (nearest)"}>
-                <FormSelect state={fields.city} options={[
-                  { id: 0, value: "Ikoyi" },
-                  { id: 1, value: "Alimosho" },
-                  { id: 2, value: "Shasha" },
-                  { id: 3, value: "Igando" },
-                  { id: 4, value: "Ikotun" },
-                  { id: 5, value: "Ipaja" },
-                  { id: 6, value: "Ayobo" }
-                ]} />
+                <FormSelect state={fields.city} />
               </FormControl2>
             </BorderedDiv>
 

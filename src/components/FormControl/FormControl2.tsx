@@ -1,10 +1,10 @@
 import { Listbox, Switch, Transition } from "@headlessui/react";
-import { FC, Fragment, useState } from "react";
+import { FC, Fragment, useEffect, useState } from "react";
 import { FaCaretDown, FaCheck, FaExclamation, FaSpinner } from "react-icons/fa";
 import { RequestStatus } from "../../Controllers/ObjectRequestHandler";
 
 enum FieldState {
-    DEFAULT = 1, WARNING = 2, VALID = 3, INVALID = 4
+    DEFAULT = 1, WARNING = 2, VALID = 3, INVALID = 4, PROCESSING = 5
 }
 const FormControl2: FC<{
     children?: any;
@@ -18,18 +18,17 @@ const FormControl2: FC<{
     }
 }> = (props) => {
     return (
-        <div className={`w-full flex justify-start items-start text-secondary-500 ${props.state.fieldState[0] === FieldState.INVALID ? "text-red-500 " : ""} ${props.state.fieldState[0] === FieldState.WARNING ? "text-amber-500 " : ""} ${props.state.fieldState[0] === FieldState.VALID ? "text-green-500 " : ""}`}>
+        <div className={`w-full flex justify-start items-start text-secondary-500 ${props.state.fieldState[0] === FieldState.INVALID ? "text-red-500 " : ""} ${props.state.fieldState[0] === FieldState.WARNING || props.state.fieldState[0] === FieldState.PROCESSING ? "text-amber-500 " : ""} ${props.state.fieldState[0] === FieldState.VALID ? "text-green-500 " : ""}`}>
             <div className={`w-full ${props.inline ? "flex-row flex items-baseline gap-2" : "flex-col"}`}>
-                {props.label ? <FormLabel2>{props.label}</FormLabel2> : ""}
+                {props.label ? <FormLabel2 stateTracker={props.state.fieldState[0]}>{props.label}</FormLabel2> : ""}
                 {props.children}
                 {props.state.message ? <FormError2 fieldState={props.state.fieldState[0]}>{props.state.message[0]}</FormError2> : ""}
-
             </div>
         </div>
     )
 }
 
-const FormLabel2: FC<{ children?: any; stateTracker?: [RequestStatus, React.Dispatch<React.SetStateAction<RequestStatus>>]; }> = (props) => (
+const FormLabel2: FC<{ children?: any; stateTracker?: FieldState; }> = (props) => (
     <div className="flex items-center gap-2 whitespace-nowrap">
         <label className="form-label inline-block mb-1 font-normal capitalize">
             {props.children}
@@ -37,9 +36,9 @@ const FormLabel2: FC<{ children?: any; stateTracker?: [RequestStatus, React.Disp
         {
             props.stateTracker ?
                 <span className={"duration-1000 transition-all ease-in-out"}>
-                    {props.stateTracker[0] === RequestStatus.PROCESSING ? <FaSpinner className='duration-500 animate-spin ease-in-out text-amber-500' /> : ""}
-                    {props.stateTracker[0] === RequestStatus.SUCCESSFUL ? <FaCheck className='text-green-500' /> : ""}
-                    {props.stateTracker[0] === RequestStatus.FAILED ? <FaExclamation className='rotate-45 text-red-500' /> : ""}
+                    {props.stateTracker === FieldState.PROCESSING ? <FaSpinner className='duration-500 animate-spin ease-in-out text-amber-500' /> : ""}
+                    {props.stateTracker === FieldState.VALID ? <FaCheck className='text-green-500' /> : ""}
+                    {props.stateTracker === FieldState.INVALID ? <FaExclamation className='text-red-500' /> : ""}
                 </span>
                 :
                 ""
@@ -51,13 +50,13 @@ interface FormInputProps extends React.DetailedHTMLProps<React.InputHTMLAttribut
     state: {
         value: [string, React.Dispatch<React.SetStateAction<string>>],
         fieldState: [FieldState, React.Dispatch<React.SetStateAction<FieldState>>],
-        verifier: (newValue: string, event: React.ChangeEvent<HTMLInputElement> ) => boolean
+        verifier: (newValue: string, event: React.ChangeEvent<HTMLInputElement>) => boolean
     }
 }
 const FormInput2: FC<FormInputProps> = (props) => {
     return (
         <input type={props.type ? props.type : "text"}
-            className={`w-full px-3 py-2 text-base font-normal text-gray-600 bg-transparent focus:shadow-md active:shadow-md shadow-secondary-300 duration-300 bg-clip-padding border border-solid rounded transition ease-in-out m-0 focus:outline-none focus:text-gray-700 focus:bg-white placeholder:text-secondary-300 border-secondary-200 focus:border-secondary-500 ${props.state.fieldState[0] === FieldState.INVALID ? "border-red-200 focus:border-red-500 shadow-red-300 text-red-600 focus:text-red-700 focus:bg-red-50 bg-red-50 placeholder:text-red-300 " : ""} ${props.state.fieldState[0] === FieldState.WARNING ? "border-amber-200 focus:border-amber-500 shadow-amber-300 text-amber-600 focus:text-amber-700 focus:bg-amber-100 bg-amber-50 placeholder:text-amber-300 " : ""} ${props.state.fieldState[0] === FieldState.VALID ? "border-green-200 focus:border-green-500 shadow-green-300 text-green-600 focus:text-green-700 focus:bg-green-100 bg-green-50 placeholder:text-green-300 " : ""}`}
+            className={`w-full px-3 py-2 text-base font-normal text-gray-600 bg-transparent focus:shadow-md active:shadow-md shadow-secondary-300 duration-300 bg-clip-padding border border-solid rounded transition ease-in-out m-0 focus:outline-none focus:text-gray-700 focus:bg-white placeholder:text-secondary-300 border-secondary-200 focus:border-secondary-500 ${props.state.fieldState[0] === FieldState.INVALID ? "border-red-200 focus:border-red-500 shadow-red-300 text-red-600 focus:text-red-700 focus:bg-red-50 bg-red-50 placeholder:text-red-300 " : ""} ${props.state.fieldState[0] === FieldState.WARNING || props.state.fieldState[0] === FieldState.PROCESSING ? "border-amber-200 focus:border-amber-500 shadow-amber-300 text-amber-600 focus:text-amber-700 focus:bg-amber-100 bg-amber-50 placeholder:text-amber-300 " : ""} ${props.state.fieldState[0] === FieldState.VALID ? "border-green-200 focus:border-green-500 shadow-green-300 text-green-600 focus:text-green-700 focus:bg-green-100 bg-green-50 placeholder:text-green-300 " : ""}`}
             placeholder={props.placeholder}
             required={props.required}
             value={props.value}
@@ -102,25 +101,31 @@ const FormCheck: FC<FormChechBoxInputProps> = (props) => {
 };
 
 interface FormSelectProps {
-    options?: {
-        id?: string | number;
-        value?: string | number;
-        inActive?: boolean;
-    }[];
     state: {
-        value: [string | number, React.Dispatch<React.SetStateAction<string | number>>],
+        value: [{ id?: string | number; value?: string | number; inActive?: boolean; }, React.Dispatch<React.SetStateAction<{ id?: string | number; value?: string | number; inActive?: boolean; }>>],
         fieldState?: [FieldState, React.Dispatch<React.SetStateAction<FieldState>>],
         verifier?: (newValue: string) => boolean
-    }
+        options?: {
+            id?: string | number;
+            value?: string | number;
+            inActive?: boolean;
+        }[],
+        onChange?: (value: { id?: string | number; value?: string | number; inActive?: boolean; }) => void
+    },
 }
 const FormSelect: FC<FormSelectProps> = (props) => {
-    const [selected, setSelected] = useState(props.options ? (props.options[0]) : {});
     return (
         <div className="">
-            <Listbox value={selected} onChange={(value: { id?: string | number | undefined; value?: string | number | undefined; inActive?: boolean | undefined; }) => { props.state.value[1](value as any); setSelected(value) }}>
+            <Listbox value={props.state.value[0]} onChange={(value: { id?: string | number | undefined; value?: string | number | undefined; inActive?: boolean | undefined; }) => {
+                props.state.value[1](value as any);
+                if (props.state.onChange) {
+                    console.log(value);
+                    props.state.onChange(value);
+                }
+            }}>
                 <div className="relative h-full">
-                    <Listbox.Button className="form-select appearance-none block w-full px-3 py-2 text-base font-normal text-secondary-500 bg-transparent bg-clip-padding bg-no-repeat border border-solid border-secondary-200 rounded transition ease-in-out duration-300 m-0 focus:text-secondary-600 focus:bg-white focus:border-secondary-600 focus:outline-none disabled:cursor-not-allowed">
-                        <span className="block truncate text-left">{selected ? selected.value : ""}</span>
+                    <Listbox.Button className={`form-select appearance-none block w-full px-3 py-2 text-base font-normal text-secondary-500 bg-transparent bg-clip-padding bg-no-repeat border border-solid border-secondary-200 rounded transition ease-in-out duration-300 m-0 focus:text-secondary-600 focus:bg-white focus:border-secondary-600 focus:outline-none disabled:cursor-not-allowed ${props.state.fieldState && (props.state.fieldState[0] === FieldState.INVALID) ? "border-red-200 focus:border-red-500 shadow-red-300 text-red-600 focus:text-red-700 focus:bg-red-50 bg-red-50 placeholder:text-red-300 " : ""} ${props.state.fieldState && (props.state.fieldState[0] === FieldState.WARNING || props.state.fieldState[0] === FieldState.PROCESSING ) ? "border-amber-200 focus:border-amber-500 shadow-amber-300 text-amber-600 focus:text-amber-700 focus:bg-amber-100 bg-amber-50 placeholder:text-amber-300 " : ""} ${props.state.fieldState && (props.state.fieldState[0] === FieldState.VALID) ? "border-green-200 focus:border-green-500 shadow-green-300 text-green-600 focus:text-green-700 focus:bg-green-100 bg-green-50 placeholder:text-green-300 " : ""}`}>
+                        <span className="block truncate text-left">{props.state.value[0] ? props.state.value[0].value : ""}</span>
                         <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                             <FaCaretDown
                                 className="h-5 w-5 text-secondary-400"
@@ -135,7 +140,7 @@ const FormSelect: FC<FormSelectProps> = (props) => {
                         leaveTo="opacity-0"
                     >
                         <Listbox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 duration-300 ease-in-out text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm customScrollBar z-10">
-                            {props.options?.map((option, index) => (
+                            {props.state.options?.map((option, index) => (
                                 <Listbox.Option
                                     key={index}
                                     className={({ active }) =>
@@ -144,7 +149,7 @@ const FormSelect: FC<FormSelectProps> = (props) => {
                                     }
                                     value={option}
                                 >
-                                    {({ selected }) => (
+                                    {({ selected, active, disabled }) => (
                                         <>
                                             <span className={`block truncate text-left duration-300 ${selected ? 'font-medium' : 'font-normal'}`}
                                             >

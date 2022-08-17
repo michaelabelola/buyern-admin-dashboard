@@ -62,6 +62,8 @@ const FormInput2: FC<FormInputProps> = (props) => {
             checked={props.checked}
             width={props.width}
             height={props.height}
+            name={props.name}
+            id={props.id}
             defaultValue={props.defaultValue}
             disabled={props.disabled}
             onBlur={props.onBlur}

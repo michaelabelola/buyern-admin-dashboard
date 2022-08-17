@@ -376,6 +376,7 @@ const SignUpPage: FC<SignUpPageProps> = () => {
     fieldKeys.forEach(fieldKey => {
       if ((fields as any)[fieldKey].verifier) {
         if (!(fields as any)[fieldKey].verifier((fields as any)[fieldKey].value[0])) {
+          console.log(fieldKey);
           isReady = false;
         }
       }
@@ -394,14 +395,12 @@ const SignUpPage: FC<SignUpPageProps> = () => {
       dob: new Date(fields.dob.value[0]),
       address: fields.address.value[0],
       address2: fields.address2.value[0],
-      city: { id: fields.city.value[0].id, name: fields.city.value[0].value },
-      state: { id: fields.state.value[0].id, name: fields.state.value[0].value },
-      country: { id: fields.country.value[0].id, name: fields.country.value[0].value },
+      city: fields.city.value[0].id,
+      state: fields.state.value[0].id,
+      country: fields.country.value[0].id
     } as User;
     console.log(user);
-    // console.log(fields.image.file);
-
-    // return;
+    console.log(fields.image.file);
     axios({
       method: "post",
       url: `${process.env.REACT_APP_BASEURL}/user`,
@@ -415,6 +414,7 @@ const SignUpPage: FC<SignUpPageProps> = () => {
           return;
         }
         console.log(response.data);
+        uploadImage(1, fields.image.file);
 
       })
       .catch((reason: any) => {
@@ -422,7 +422,23 @@ const SignUpPage: FC<SignUpPageProps> = () => {
       });
 
   }
-  const uploadImage = () => {
+  const uploadImage = (id:number, file: any) => {
+var data = new FormData();
+data.append('image', file);
+    axios({
+      method: 'post',
+      url: `${process.env.REACT_APP_BASEURL}/user/image?id=${id}`,
+      data: data
+    })
+      .then((value: AxiosResponse<any, any>) => {
+  let response:ResponseDTO<User> = value.data;
+  console.log(JSON.stringify(response.data));
+})
+.catch(function (error) {
+  console.log(error);
+});
+
+
 
   }
   useEffect(() => {
@@ -461,11 +477,11 @@ const SignUpPage: FC<SignUpPageProps> = () => {
               </FormControl2>
 
               <FormControl2 state={fields.dob} label={"* Date Of Birth"}>
-                <FormInput2 state={fields.dob} placeholder={"Date Of Birth"} type={"date"} required />
+                <FormInput2 state={fields.dob} placeholder={"Date Of Birth"} name={"date"} type={"date"} required />
               </FormControl2>
 
               <FormControl2 state={fields.phone} label={"* Phone Number"}>
-                <FormInput2 state={fields.phone} placeholder={"(234) *** *** ****"} type={"tel"} required />
+                <FormInput2 state={fields.phone} placeholder={"(234) *** *** ****"} name={"phone"} type={"tel"} required />
                 {/* {nameError ? <FormError>{nameError}</FormError> : ""} */}
               </FormControl2>
               <FormControl2 state={fields.gender} label={"* Gender"}>

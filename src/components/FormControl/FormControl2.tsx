@@ -1,7 +1,6 @@
 import { Listbox, Switch, Transition } from "@headlessui/react";
-import { FC, Fragment, useEffect, useState } from "react";
+import { FC, Fragment } from "react";
 import { FaCaretDown, FaCheck, FaExclamation, FaSpinner } from "react-icons/fa";
-import { RequestStatus } from "../../Controllers/ObjectRequestHandler";
 
 enum FieldState {
     DEFAULT = 1, WARNING = 2, VALID = 3, INVALID = 4, PROCESSING = 5
@@ -65,6 +64,7 @@ const FormInput2: FC<FormInputProps> = (props) => {
             height={props.height}
             defaultValue={props.defaultValue}
             disabled={props.disabled}
+            onBlur={props.onBlur}
             onChange={(ev: React.ChangeEvent<HTMLInputElement>) => {
                 if (props.state) props.state.value[1](ev.currentTarget.value);
                 if (props.state.verifier) props.state.verifier(ev.currentTarget.value, ev);

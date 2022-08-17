@@ -103,9 +103,37 @@ const SignUpPage: FC<SignUpPageProps> = () => {
         })
         .catch((reason: any) => {
           fields.country.fieldState[1](FieldState.INVALID);
+          fields.country.value[1]({ id: 0, value: "no countries" })
+          fields.state.value[1]({ id: 0, value: "no states" })
+          fields.city.value[1]({ id: 0, value: "no cities" })
           console.log(reason);
         });
     }
+  }
+  let emailAvailabilityRequest = (email: string) => {
+    fields.email.fieldState[1](FieldState.PROCESSING)
+    fields.email.message[1]("")
+    axios({ url: `${process.env.REACT_APP_BASEURL}/user/email/isRegistered?email=${email}` })
+      .then((value: AxiosResponse<any, any>) => {
+        let response: ResponseDTO<{ email: string, registered: true }> = value.data;
+        if (response.code !== "00") {
+          fields.email.fieldState[1](FieldState.INVALID);
+          fields.email.message[1]("cannot check for availability");
+        }
+        if (!response.data.registered) {
+          fields.email.fieldState[1](FieldState.VALID);
+          fields.email.message[1](undefined);
+          fields.email.isAvailable[1](true);
+        } else {
+          fields.email.fieldState[1](FieldState.INVALID);
+          fields.email.message[1]("Email is already registered");
+          fields.email.isAvailable[1](false);
+        }
+      })
+      .catch((reason: any) => {
+        fields.state.fieldState[1](FieldState.INVALID);
+        console.log(reason);
+      });
   }
   const fields = {
     firstName: {
@@ -161,19 +189,20 @@ const SignUpPage: FC<SignUpPageProps> = () => {
       message: useState("" as any),
       value: useState(""),
       fieldState: useState(FieldState.DEFAULT),
+      isAvailable: useState(false),
       verifier: (newValue: string) => {
         if (!newValue || newValue === "") {
           fields.email.message[1]("can't be empty");
           fields.email.fieldState[1](FieldState.INVALID);
           return false;
         } else if (!newValue.match("[a-z0-9._%+-]+@[a-z0-9.-]+.[a-z]{2,3}$")) {
-
           fields.email.message[1]("not a valid email");
           fields.email.fieldState[1](FieldState.INVALID);
           return false;
         }
-        fields.email.message[1](undefined);
-        fields.email.fieldState[1](FieldState.VALID);
+        emailAvailabilityRequest(newValue);
+        // fields.email.message[1](undefined);
+        // fields.email.fieldState[1](FieldState.VALID);
         return true;
       }
     },
@@ -264,7 +293,6 @@ const SignUpPage: FC<SignUpPageProps> = () => {
           return false;
         }
         if (ev.currentTarget.files) {
-
           fields.image.file = ev.currentTarget.files[0] as any;
           // console.log(fields.image.file);
           fields.image.message[1](undefined);
@@ -334,6 +362,7 @@ const SignUpPage: FC<SignUpPageProps> = () => {
     return months;
   }
   const stateModal = new StateModal(useState(false), useState(RequestStatus.IDLE as RequestStatus), useState("" as any));
+
   const submitForm = () => {
     registerAccount();
     // stateModal.setStatus(RequestStatus.PROCESSING, "Registering User", true);
@@ -346,11 +375,16 @@ const SignUpPage: FC<SignUpPageProps> = () => {
     let isReady: boolean = true;
     fieldKeys.forEach(fieldKey => {
       if ((fields as any)[fieldKey].verifier) {
-        if (!(fields as any)[fieldKey].verifier((fields as any)[fieldKey].value[0])) isReady = false;
-        console.log(fieldKey);
+        if (!(fields as any)[fieldKey].verifier((fields as any)[fieldKey].value[0])) {
+          isReady = false;
+        }
       }
     });
-    console.log(isReady);
+    if (!fields.email.isAvailable[0]) {
+      isReady = false;
+      console.log("email taken");
+    }
+    console.log(fields.email.isAvailable);
     if (!isReady) return;
     let user: User = {
       firstName: fields.firstName.value[0],
@@ -360,12 +394,14 @@ const SignUpPage: FC<SignUpPageProps> = () => {
       dob: new Date(fields.dob.value[0]),
       address: fields.address.value[0],
       address2: fields.address2.value[0],
-      city: { id: fields.city.value[0].id, name: fields.city.value[0].value},
+      city: { id: fields.city.value[0].id, name: fields.city.value[0].value },
       state: { id: fields.state.value[0].id, name: fields.state.value[0].value },
       country: { id: fields.country.value[0].id, name: fields.country.value[0].value },
     } as User;
     console.log(user);
+    // console.log(fields.image.file);
 
+    // return;
     axios({
       method: "post",
       url: `${process.env.REACT_APP_BASEURL}/user`,
@@ -373,10 +409,20 @@ const SignUpPage: FC<SignUpPageProps> = () => {
     })
       .then((value: AxiosResponse<any, any>) => {
         console.log(value);
+        let response: ResponseDTO<User> = value.data;
+        if (response.code !== "00") {
+          fields.country.fieldState[1](FieldState.INVALID);
+          return;
+        }
+        console.log(response.data);
+
       })
       .catch((reason: any) => {
         console.log(reason);
       });
+
+  }
+  const uploadImage = () => {
 
   }
   useEffect(() => {

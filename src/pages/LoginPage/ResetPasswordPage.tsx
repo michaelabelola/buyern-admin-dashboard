@@ -1,5 +1,5 @@
 import { FC, useState } from 'react';
-import { FaSignInAlt } from 'react-icons/fa';
+import { FaKey, FaSignInAlt } from 'react-icons/fa';
 import Button from '../../components/Button/Button2';
 import { CardBody, CardTitle } from '../../components/Card/Card';
 import Card from '../../components/Card/Card.lazy';
@@ -7,9 +7,9 @@ import FormControl2, { FieldState, FormInput2, FormSwitch } from '../../componen
 import StateModal from '../../components/Modal/StateModal';
 import { RequestStatus } from '../../Controllers/ObjectRequestHandler';
 
-interface LoginPageProps { }
+interface ResetPasswordPageProps { }
 
-const LoginPage: FC<LoginPageProps> = () => {
+const ResetPasswordPage: FC<ResetPasswordPageProps> = () => {
   const fields = {
     email: {
       message: useState("" as any),
@@ -79,35 +79,14 @@ const LoginPage: FC<LoginPageProps> = () => {
     <div className='min-h-screen w-screen flex items-center justify-center overflow-hidden'>
       <div className={"w-screen h-screen opacity-70 scale-110 blur grayscale brightness-50"}><img src='http://127.0.0.1:10000/devstoreaccount1/images/backgrounds%2Fsignup_bg.jpg' className={"w-full h-full object-cover"} alt='bg' /></div>
       <Card classNames={"w-[80%] sm:w-[55%] md:w-[45%] lg:w-[35%] xl:w-[30%] 2xl:w-[25%] absolute"} childClassNames={"p-10 h-fit max-h-[95vh]"}>
-        <div className={"flex justify-center mb-8"}>
-          <img src='http://127.0.0.1:10000/devstoreaccount1/images/logo.jpeg' alt={"logo"} className={"w-12 h-12 rounded-full border-secondary-400 border-2"} />
+        <div className={"flex justify-center mb-8 text-secondary-500 font-bold"}>
+          <FaKey />
         </div>
-        <CardTitle><h5 className="text-secondary-500 text-xl font-medium mb-8">Login User</h5></CardTitle>
+        <CardTitle><h5 className="text-secondary-500 text-xl font-medium mb-8">Password Reset Successful</h5></CardTitle>
         <CardBody>
-          <form className="w-full justify-center gap-8 flex flex-col" onSubmit={() => (false)}>
-            <FormControl2 state={fields.email} label={"* Email"}>
-              <FormInput2 state={fields.email} placeholder="E-Mail" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}$" type={"email"} required />
-            </FormControl2>
-            <FormControl2 state={fields.password} label={"* Password"}>
-              <FormInput2 state={fields.password} placeholder="Password" type={"password"} required />
-            </FormControl2>
-            <div className={"w-full"}>
-              <FormControl2 state={fields.rememberMe} label={"Remember Me"} inline>
-                <FormSwitch state={fields.rememberMe} />
-              </FormControl2>
-            </div>
-            <div className={"flex justify-center"}>
-              <Button type='button' onClick={() => { submitForm() }}>
-                <FaSignInAlt />Sign In
-              </Button>
-            </div>
-          </form>
-          <div className={"flex justify-between cursor-pointer mt-2"}>
-            <a href={"/forgotPassword"} className={"text-secondary-500 hover:underline cursor-pointer"}>
-              <div>Forgot Password</div>
-            </a>
-            <a href={"/signup"} className={"text-secondary-500 hover:underline cursor-pointer"}>
-              <div>Sign Up</div>
+          <div className={"flex justify-end"}>
+            <a href={"/login"} className={"text-secondary-500 hover:underline cursor-pointer w-fit"}>
+              <div>Proceed To Login</div>
             </a>
           </div>
         </CardBody>
@@ -117,4 +96,4 @@ const LoginPage: FC<LoginPageProps> = () => {
   )
 };
 
-export default LoginPage;
+export default ResetPasswordPage;

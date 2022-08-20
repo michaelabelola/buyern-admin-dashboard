@@ -47,9 +47,9 @@ const View: FC<{
               <Dialog.Panel
                 tabIndex={-1}
                 className={`w-full max-w-md transform overflow-hidden rounded-2xl bg-white border-2 text-secondary-500 border-secondary-400 p-6 text-left align-middle shadow-xl transition-all flex flex-col items-center gap-4 justify-center  ${props.status === RequestStatus.PROCESSING ||
-                    props.status === RequestStatus.WARNING
-                    ? "border-amber-500"
-                    : ""
+                  props.status === RequestStatus.WARNING
+                  ? "border-amber-500"
+                  : ""
                   } ${props.status === RequestStatus.SUCCESSFUL
                     ? "border-green-500"
                     : ""
@@ -73,7 +73,7 @@ const View: FC<{
                   )}
                   {props.status === RequestStatus.WARNING ? (
                     <FaExclamation
-                      className={"duration-500 scale-110 text-amber-500"}
+                      className={"duration-500 scale-110 text-amber-500 rotate-[22]"}
                     />
                   ) : (
                     ""
@@ -90,9 +90,9 @@ const View: FC<{
                 <Dialog.Title
                   as="h3"
                   className={`text-lg font-medium leading-6 ${props.status === RequestStatus.PROCESSING ||
-                      props.status === RequestStatus.WARNING
-                      ? "text-amber-500"
-                      : ""
+                    props.status === RequestStatus.WARNING
+                    ? "text-amber-500"
+                    : ""
                     } ${props.status === RequestStatus.SUCCESSFUL
                       ? "text-green-500"
                       : ""
@@ -148,20 +148,32 @@ class StateModal {
   close = () => {
     this._open(false);
   }
-  setStatus = (__status: RequestStatus, message?: string | ReactElement, open?: boolean, delay?: number) => {
+  /**
+   *  <h3>Modal info status setter</h3>
+   * @param __status current status of the request
+   * @param message message to be displayed in the modal
+   * @param open set to true to open, false to close and undefined to leave the modal in its current state
+   * @param delay tle amount of time the modal should be visible for, set undefined to disable this feature, set -1 to use the default duration 3000ms
+   */
+  setStatus = (__status: RequestStatus, message?: string | ReactElement, open?: boolean, delay?: number, callback?: Function) => {
     if (message && this.messageState) {
       this.messageState[1](message);
     }
     this._setStatus(__status);
-    if (open === undefined || (open === this.isOpen)) {
-      return;
+    if (open === undefined || (open === this.isOpen)) { }
+    else if (!open) {
+      this.close();
     } else {
+      <div>Account Registered Sucessfully <br /> redirecting ...</div>
       this.open();
     }
     if (delay) {
       setTimeout(() => {
-        this.close()
+        this.close();
+        if (callback) callback();
       }, (delay === -1) ? 3000 : delay);
+    } else {
+      if (callback) callback();
     }
   }
   view = () => (<View title={this.messageState ? this.messageState[0] : undefined} openState={[this.isOpen, this._open]} status={this.status} />)

@@ -1,5 +1,6 @@
 import { FC, useState } from 'react';
-import { FaSignInAlt } from 'react-icons/fa';
+import { FaPenAlt, FaSignInAlt } from 'react-icons/fa';
+import { NavigateFunction, useNavigate } from 'react-router-dom';
 import Button from '../../components/Button/Button2';
 import { CardBody, CardTitle } from '../../components/Card/Card';
 import Card from '../../components/Card/Card.lazy';
@@ -7,9 +8,10 @@ import FormControl2, { FieldState, FormInput2, FormSwitch } from '../../componen
 import StateModal from '../../components/Modal/StateModal';
 import { RequestStatus } from '../../Controllers/ObjectRequestHandler';
 
-interface LoginPageProps { }
+interface ForgotPasswordPageProps { }
 
-const LoginPage: FC<LoginPageProps> = () => {
+const ForgotPasswordPage: FC<ForgotPasswordPageProps> = () => {
+  let nav: NavigateFunction = useNavigate();
   const fields = {
     email: {
       message: useState("" as any),
@@ -61,6 +63,8 @@ const LoginPage: FC<LoginPageProps> = () => {
   }
   const stateModal = new StateModal(useState(false), useState(RequestStatus.IDLE as RequestStatus), useState("" as any));
   const submitForm = () => {
+    nav("/resetPassword");
+    return
     // stateModal.setStatus(RequestStatus.PROCESSING, <span>Signing In as <b>abelmichaelola@gmail.com ...</b></span>, true);
     // setTimeout(() => {
     //   stateModal.setStatus(RequestStatus.SUCCESSFUL, "Signed In Sucessfully", true, -1);
@@ -82,32 +86,21 @@ const LoginPage: FC<LoginPageProps> = () => {
         <div className={"flex justify-center mb-8"}>
           <img src='http://127.0.0.1:10000/devstoreaccount1/images/logo.jpeg' alt={"logo"} className={"w-12 h-12 rounded-full border-secondary-400 border-2"} />
         </div>
-        <CardTitle><h5 className="text-secondary-500 text-xl font-medium mb-8">Login User</h5></CardTitle>
+        <CardTitle><h5 className="text-secondary-500 text-xl font-medium mb-8">Forgot Password</h5></CardTitle>
         <CardBody>
           <form className="w-full justify-center gap-8 flex flex-col" onSubmit={() => (false)}>
             <FormControl2 state={fields.email} label={"* Email"}>
               <FormInput2 state={fields.email} placeholder="E-Mail" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}$" type={"email"} required />
             </FormControl2>
-            <FormControl2 state={fields.password} label={"* Password"}>
-              <FormInput2 state={fields.password} placeholder="Password" type={"password"} required />
-            </FormControl2>
-            <div className={"w-full"}>
-              <FormControl2 state={fields.rememberMe} label={"Remember Me"} inline>
-                <FormSwitch state={fields.rememberMe} />
-              </FormControl2>
-            </div>
             <div className={"flex justify-center"}>
               <Button type='button' onClick={() => { submitForm() }}>
-                <FaSignInAlt />Sign In
+                <FaPenAlt />Reset Password
               </Button>
             </div>
           </form>
-          <div className={"flex justify-between cursor-pointer mt-2"}>
-            <a href={"/forgotPassword"} className={"text-secondary-500 hover:underline cursor-pointer"}>
-              <div>Forgot Password</div>
-            </a>
-            <a href={"/signup"} className={"text-secondary-500 hover:underline cursor-pointer"}>
-              <div>Sign Up</div>
+          <div className={"flex justify-start cursor-pointer"}>
+            <a href={"/login"} className={"text-secondary-500 hover:underline cursor-pointer"}>
+              <div>Login</div>
             </a>
           </div>
         </CardBody>
@@ -117,4 +110,4 @@ const LoginPage: FC<LoginPageProps> = () => {
   )
 };
 
-export default LoginPage;
+export default ForgotPasswordPage;

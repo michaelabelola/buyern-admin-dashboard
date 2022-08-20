@@ -37,7 +37,7 @@ const FormLabel2: FC<{ children?: any; stateTracker?: FieldState; }> = (props) =
                 <span className={"duration-1000 transition-all ease-in-out"}>
                     {props.stateTracker === FieldState.PROCESSING ? <FaSpinner className='duration-500 animate-spin ease-in-out text-amber-500' /> : ""}
                     {props.stateTracker === FieldState.VALID ? <FaCheck className='text-green-500' /> : ""}
-                    {props.stateTracker === FieldState.INVALID ? <FaExclamation className='text-red-500' /> : ""}
+                    {props.stateTracker === FieldState.INVALID ? <FaExclamation className='text-red-500 rotate-[22deg]' /> : ""}
                 </span>
                 :
                 ""
@@ -121,7 +121,6 @@ const FormSelect: FC<FormSelectProps> = (props) => {
             <Listbox value={props.state.value[0]} onChange={(value: { id?: string | number | undefined; value?: string | number | undefined; inActive?: boolean | undefined; }) => {
                 props.state.value[1](value as any);
                 if (props.state.onChange) {
-                    console.log(value);
                     props.state.onChange(value);
                 }
             }}>

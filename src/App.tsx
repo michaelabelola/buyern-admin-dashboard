@@ -13,6 +13,8 @@ import FinanceNavigation from './components/MainNavigationView/FinanceNavigation
 import UsersNavigation from './components/MainNavigationView/UsersNavigation/UsersNavigation.lazy';
 import LoginPage from './pages/LoginPage/LoginPage';
 import SignUpPage from './pages/SignUpPage/SignUpPage.lazy';
+import ForgotPasswordPage from './pages/LoginPage/ForgotPasswordPage';
+import ResetPasswordPage from './pages/LoginPage/ResetPasswordPage';
 const Redirect: FC<{ to: string }> = (props) => {
   return <Navigate to={`/${useParams().entityId + props.to}`} replace />
 }
@@ -38,8 +40,10 @@ function App() {
         {/* w-[18vw] md:w-[18vw] lg:w-[18vw] xl:w-[18vw] */}
         <Routes>
 
-          <Route path={"/login"} element={<div></div>} />
           <Route path={"/signup"} element={<div></div>} />
+          <Route path={"/login"} element={<div></div>} />
+          <Route path={"/forgotPassword"} element={<div></div>} />
+          <Route path={"/resetPassword"} element={<div></div>} />
           <Route path="/:entityId" element={<MainNavigationView isMobile={mobile} sideNavOpenState={[sideNavOpen, setSideNavOpen]} />} >
             <Route path={"/:entityId/inventories"} element={<InventoryNavigation isMobile={mobile} sideNavOpenState={[sideNavOpen, setSideNavOpen]} />} >
               <Route element={<Redirect to={"/inventories/all"} />} index />
@@ -74,6 +78,8 @@ function App() {
           </div></>} />
           <Route path={"/login"} element={<LoginPage />} />
           <Route path={"/signup"} element={<SignUpPage />} />
+          <Route path={"/forgotPassword"} element={<ForgotPasswordPage />} />
+          <Route path={"/resetPassword"} element={<ResetPasswordPage />} />
 
           <Route path="/:entityId">
             <Route element={<Redirect to={"/dashboard"} />} index />

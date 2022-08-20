@@ -1,6 +1,7 @@
-import axios, { AxiosResponse } from 'axios';
+import axios, { AxiosError, AxiosResponse } from 'axios';
 import React, { FC, useEffect, useState } from 'react';
 import { FaSignInAlt } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 import BorderedDiv from '../../components/BorderedDiv';
 import Button from '../../components/Button/Button2';
 import { CardBody, CardTitle } from '../../components/Card/Card';
@@ -15,7 +16,9 @@ import { User } from '../../Models/User';
 interface SignUpPageProps { }
 
 const SignUpPage: FC<SignUpPageProps> = () => {
-
+  const navigate = useNavigate();
+  const stateModal = new StateModal(useState(false), useState(RequestStatus.IDLE as RequestStatus), useState("" as any));
+  
   let cities = {
     dataState: useState([] as City[]),
     fetch: (stateId?: number) => {
@@ -270,13 +273,14 @@ const SignUpPage: FC<SignUpPageProps> = () => {
     },
     image: {
       message: useState("" as any),
-      file: File,
+      file: useState(undefined as any as File),
       value: useState(""),
       fieldState: useState(FieldState.DEFAULT),
       verifier: (newValue: string, ev: React.ChangeEvent<HTMLInputElement>) => {
         if (!ev && !newValue) {
           fields.image.message[1]("No image selected");
           fields.image.fieldState[1](FieldState.INVALID);
+          fields.image.file[1](undefined as any);
           return false;
         }
         if (ev && ev.currentTarget) {
@@ -290,10 +294,11 @@ const SignUpPage: FC<SignUpPageProps> = () => {
         if (ev.currentTarget.files && (ev.currentTarget.files[0].type !== "image/jpeg" && ev.currentTarget.files[0].type !== "image/jpg" && ev.currentTarget.files[0].type !== "image/png")) {
           fields.image.message[1]("Unsupported format. only image/jpeg or image/png are supported");
           fields.image.fieldState[1](FieldState.INVALID);
+          fields.image.file[1](undefined as any);
           return false;
         }
         if (ev.currentTarget.files) {
-          fields.image.file = ev.currentTarget.files[0] as any;
+          fields.image.file[1](ev.currentTarget.files[0] as any);
           // console.log(fields.image.file);
           fields.image.message[1](undefined);
           fields.image.fieldState[1](FieldState.VALID);
@@ -361,16 +366,7 @@ const SignUpPage: FC<SignUpPageProps> = () => {
     let months = (years * 12) + (date2.getMonth() - date1.getMonth());
     return months;
   }
-  const stateModal = new StateModal(useState(false), useState(RequestStatus.IDLE as RequestStatus), useState("" as any));
-
   const submitForm = () => {
-    registerAccount();
-    // stateModal.setStatus(RequestStatus.PROCESSING, "Registering User", true);
-    // setTimeout(() => {
-    //   stateModal.setStatus(RequestStatus.SUCCESSFUL, "User Registered Sucessfully", true, -1);
-    // }, 5000);
-  }
-  const registerAccount = () => {
     let fieldKeys = Object.keys(fields);
     let isReady: boolean = true;
     fieldKeys.forEach(fieldKey => {
@@ -397,49 +393,53 @@ const SignUpPage: FC<SignUpPageProps> = () => {
       address2: fields.address2.value[0],
       city: fields.city.value[0].id,
       state: fields.state.value[0].id,
-      country: fields.country.value[0].id
-    } as User;
-    console.log(user);
-    console.log(fields.image.file);
+      country: fields.country.value[0].id,
+      password: fields.password.value[0]
+    } as any as User;
+    // console.log(user);
+    // return;
+    stateModal.setStatus(RequestStatus.PROCESSING, <span>Signing Up as <b>{user.email}</b> ...</span>, true)
     axios({
       method: "post",
-      url: `${process.env.REACT_APP_BASEURL}/user`,
+      url: `${process.env.REACT_APP_BASEURL}/signUp`,
       data: user,
     })
       .then((value: AxiosResponse<any, any>) => {
-        console.log(value);
         let response: ResponseDTO<User> = value.data;
         if (response.code !== "00") {
           fields.country.fieldState[1](FieldState.INVALID);
           return;
         }
-        console.log(response.data);
-        uploadImage(1, fields.image.file);
-
+        stateModal.setStatus(RequestStatus.PROCESSING, "Uploading profile image")
+        uploadImage(response.data.id, fields.image.file[0]);
       })
-      .catch((reason: any) => {
+      .catch((reason: AxiosError) => {
         console.log(reason);
+        stateModal.setStatus(RequestStatus.PROCESSING, `Error Creating user: ${reason.message}`, undefined, -1 )
       });
-
   }
-  const uploadImage = (id:number, file: any) => {
-var data = new FormData();
-data.append('image', file);
+  const uploadImage = (id: number, file: any) => {
+    var data = new FormData();
+    data.append('image', file);
     axios({
       method: 'post',
       url: `${process.env.REACT_APP_BASEURL}/user/image?id=${id}`,
       data: data
     })
       .then((value: AxiosResponse<any, any>) => {
-  let response:ResponseDTO<User> = value.data;
-  console.log(JSON.stringify(response.data));
-})
-.catch(function (error) {
-  console.log(error);
-});
-
-
-
+        // let response: ResponseDTO<User> = value.data;
+        stateModal.setStatus(RequestStatus.SUCCESSFUL, <div>Account Registered Sucessfully <br /> redirecting ...</div>, undefined, 2000, () => {
+          navigate("../login", { replace: false });
+        })
+      })
+      .catch(function (error:AxiosError) {
+        console.log(error);
+        stateModal.setStatus(RequestStatus.WARNING, `Error uploading image: ${error.message}`, undefined, 2000, ()=>{
+          stateModal.setStatus(RequestStatus.SUCCESSFUL, <div>Account Registered Sucessfully <br/> redirecting ...</div>, undefined, 2000, ()=>{
+            navigate("../login", { replace: false });
+          })
+        })
+      });
   }
   useEffect(() => {
     if (countries.dataState[0] === undefined || countries.dataState[0].length < 1) {
@@ -449,10 +449,10 @@ data.append('image', file);
 
   return (
     <div className='min-h-screen w-screen flex items-center justify-center overflow-hidden bg-white'>
-      <div className={"w-screen h-screen opacity-70 scale-110 blur grayscale brightness-50"}><img src='http://127.0.0.1:10000/devstoreaccount1/test/bg%2FBojoRiver_ROW2280567335_1920x1080.jpg' className={"w-full h-full object-cover"} alt='bg' /></div>
+      <div className={"w-screen h-screen opacity-70 scale-110 blur grayscale brightness-50"}><img src='http://127.0.0.1:10000/devstoreaccount1/images/backgrounds%2Fsignup_bg.jpg' className={"w-full h-full object-cover"} alt='bg' /></div>
       <Card classNames={"w-[80%] sm:w-[60%] md:w-[50%] lg:w-[45%] xl:w-[40%] 2xl:w-[35%] absolute"} childClassNames={"p-10 h-fit max-h-[95vh]"}>
         <div className={"flex justify-center mb-8"}>
-          <img src='http://127.0.0.1:10000/devstoreaccount1/entities/f07bb90a-202a-4ed3-96c6-2f9b70b04480/logo.png' alt={"logo"} className={"w-12 h-12 rounded-full border-secondary-400 border-2"} />
+          <img src='http://127.0.0.1:10000/devstoreaccount1/images/logo.jpeg' alt={"logo"} className={"w-12 h-12 rounded-full border-secondary-400 border-2"} />
         </div>
         <CardTitle><h5 className="text-secondary-500 text-xl font-medium mb-8">Register User</h5></CardTitle>
         <CardBody>

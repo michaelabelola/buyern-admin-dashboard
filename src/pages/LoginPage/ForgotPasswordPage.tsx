@@ -81,10 +81,10 @@ const ForgotPasswordPage: FC<ForgotPasswordPageProps> = () => {
   }
   return (
     <div className='min-h-screen w-screen flex items-center justify-center overflow-hidden'>
-      <div className={"w-screen h-screen opacity-70 scale-110 blur grayscale brightness-50"}><img src='http://127.0.0.1:10000/devstoreaccount1/images/backgrounds%2Fsignup_bg.jpg' className={"w-full h-full object-cover"} alt='bg' /></div>
+      <div className={"w-screen h-screen opacity-70 scale-110 blur grayscale brightness-50"}><img src={`${process.env.REACT_APP_STORAGE_SERVER}/images/backgrounds%2Fsignup_bg.jpg`} className={"w-full h-full object-cover"} alt='bg' /></div>
       <Card classNames={"w-[80%] sm:w-[55%] md:w-[45%] lg:w-[35%] xl:w-[30%] 2xl:w-[25%] absolute"} childClassNames={"p-10 h-fit max-h-[95vh]"}>
         <div className={"flex justify-center mb-8"}>
-          <img src='http://127.0.0.1:10000/devstoreaccount1/images/logo.jpeg' alt={"logo"} className={"w-12 h-12 rounded-full border-secondary-400 border-2"} />
+          <img src={`${process.env.REACT_APP_STORAGE_SERVER}/images/logo.jpeg`} alt={"logo"} className={"w-12 h-12 rounded-full border-secondary-400 border-2"} />
         </div>
         <CardTitle><h5 className="text-secondary-500 text-xl font-medium mb-8">Forgot Password</h5></CardTitle>
         <CardBody>

@@ -116,7 +116,7 @@ const SignUpPage: FC<SignUpPageProps> = () => {
   let emailAvailabilityRequest = (email: string) => {
     fields.email.fieldState[1](FieldState.PROCESSING)
     fields.email.message[1]("")
-    axios({ url: `${process.env.REACT_APP_BASEURL}/user/email/isRegistered?email=${email}` })
+    axios({ url: `${process.env.REACT_APP_USER_AUTH_SERVER}/email/isRegistered?email=${email}` })
       .then((value: AxiosResponse<any, any>) => {
         let response: ResponseDTO<{ email: string, registered: true }> = value.data;
         if (response.code !== "00") {
@@ -372,7 +372,7 @@ const SignUpPage: FC<SignUpPageProps> = () => {
     fieldKeys.forEach(fieldKey => {
       if ((fields as any)[fieldKey].verifier) {
         if (!(fields as any)[fieldKey].verifier((fields as any)[fieldKey].value[0])) {
-          console.log(fieldKey);
+          console.error(`INPUT ERROR: ${fieldKey} caused an error`);
           isReady = false;
         }
       }
@@ -383,62 +383,44 @@ const SignUpPage: FC<SignUpPageProps> = () => {
     }
     console.log(fields.email.isAvailable);
     if (!isReady) return;
-    let user: User = {
-      firstName: fields.firstName.value[0],
-      lastName: fields.lastName.value[0],
-      email: fields.email.value[0],
-      phone: fields.phone.value[0],
-      dob: new Date(fields.dob.value[0]),
-      address: fields.address.value[0],
-      address2: fields.address2.value[0],
-      city: fields.city.value[0].id,
-      state: fields.state.value[0].id,
-      country: fields.country.value[0].id,
-      password: fields.password.value[0]
-    } as any as User;
     // console.log(user);
     // return;
-    stateModal.setStatus(RequestStatus.PROCESSING, <span>Signing Up as <b>{user.email}</b> ...</span>, true)
+
+    
+    var data: FormData = new FormData();
+    data.append('profileImage', fields.image.file[0] as any);
+    data.append('firstName', fields.firstName.value[0]);
+    data.append('lastName', fields.lastName.value[0]);
+    data.append('email', fields.email.value[0]);
+    data.append('phone', fields.phone.value[0]);
+    data.append('dob', fields.dob.value[0]);
+    data.append('address', fields.address.value[0]);
+    data.append('address2', fields.address2.value[0]);
+    data.append('state', fields.state.value[0].id);
+    data.append('city', fields.city.value[0].id);
+    data.append('country', fields.country.value[0].id);
+    data.append('password', fields.password.value[0]);
+    data.append('profileImage', fields.image.file[0]);
+    stateModal.setStatus(RequestStatus.PROCESSING, <span>Signing Up as <b>{fields.email.value[0]}</b> ...</span>, true)
     axios({
       method: "post",
-      url: `${process.env.REACT_APP_BASEURL}/signUp`,
-      data: user,
+      url: `${process.env.REACT_APP_USER_AUTH_SERVER}/signup`,
+      data: data,
     })
       .then((value: AxiosResponse<any, any>) => {
         let response: ResponseDTO<User> = value.data;
         if (response.code !== "00") {
-          fields.country.fieldState[1](FieldState.INVALID);
+          // Show toast if error message
           return;
         }
-        stateModal.setStatus(RequestStatus.PROCESSING, "Uploading profile image")
-        uploadImage(response.data.id, fields.image.file[0]);
+        stateModal.setStatus(RequestStatus.SUCCESSFUL, <div>Account Registered Sucessfully <br /> redirecting ...</div>, undefined, 2000, () => {
+          navigate("../login", { replace: false });
+        })
+        // uploadImage(response.data.id, fields.image.file[0]);
       })
       .catch((reason: AxiosError) => {
         console.log(reason);
         stateModal.setStatus(RequestStatus.PROCESSING, `Error Creating user: ${reason.message}`, undefined, -1 )
-      });
-  }
-  const uploadImage = (id: number, file: any) => {
-    var data = new FormData();
-    data.append('image', file);
-    axios({
-      method: 'post',
-      url: `${process.env.REACT_APP_BASEURL}/user/image?id=${id}`,
-      data: data
-    })
-      .then((value: AxiosResponse<any, any>) => {
-        // let response: ResponseDTO<User> = value.data;
-        stateModal.setStatus(RequestStatus.SUCCESSFUL, <div>Account Registered Sucessfully <br /> redirecting ...</div>, undefined, 2000, () => {
-          navigate("../login", { replace: false });
-        })
-      })
-      .catch(function (error:AxiosError) {
-        console.log(error);
-        stateModal.setStatus(RequestStatus.WARNING, `Error uploading image: ${error.message}`, undefined, 2000, ()=>{
-          stateModal.setStatus(RequestStatus.SUCCESSFUL, <div>Account Registered Sucessfully <br/> redirecting ...</div>, undefined, 2000, ()=>{
-            navigate("../login", { replace: false });
-          })
-        })
       });
   }
   useEffect(() => {
@@ -449,10 +431,10 @@ const SignUpPage: FC<SignUpPageProps> = () => {
 
   return (
     <div className='min-h-screen w-screen flex items-center justify-center overflow-hidden bg-white'>
-      <div className={"w-screen h-screen opacity-70 scale-110 blur grayscale brightness-50"}><img src='http://127.0.0.1:10000/devstoreaccount1/images/backgrounds%2Fsignup_bg.jpg' className={"w-full h-full object-cover"} alt='bg' /></div>
+      <div className={"w-screen h-screen opacity-70 scale-110 blur grayscale brightness-50"}><img src={`${process.env.REACT_APP_STORAGE_SERVER}/images/backgrounds%2Fsignup_bg.jpg`} className={"w-full h-full object-cover"} alt='bg' /></div>
       <Card classNames={"w-[80%] sm:w-[60%] md:w-[50%] lg:w-[45%] xl:w-[40%] 2xl:w-[35%] absolute"} childClassNames={"p-10 h-fit max-h-[95vh]"}>
         <div className={"flex justify-center mb-8"}>
-          <img src='http://127.0.0.1:10000/devstoreaccount1/images/logo.jpeg' alt={"logo"} className={"w-12 h-12 rounded-full border-secondary-400 border-2"} />
+          <img src={`${process.env.REACT_APP_STORAGE_SERVER}/images/logo.jpeg`} alt={"logo"} className={"w-12 h-12 rounded-full border-secondary-400 border-2"} />
         </div>
         <CardTitle><h5 className="text-secondary-500 text-xl font-medium mb-8">Register User</h5></CardTitle>
         <CardBody>

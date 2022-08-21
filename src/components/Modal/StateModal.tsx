@@ -4,7 +4,6 @@ import { RequestStatus } from "../../Controllers/ObjectRequestHandler";
 import {
   FaCheck,
   FaExclamation,
-  FaPlus,
   FaSpinner,
 } from "react-icons/fa";
 
@@ -67,7 +66,7 @@ const View: FC<{
                     ""
                   )}
                   {props.status === RequestStatus.FAILED ? (
-                    <FaPlus className={"duration-500 rotate-45 text-red-500"} />
+                    <FaExclamation className={"duration-500 text-red-500"} />
                   ) : (
                     ""
                   )}

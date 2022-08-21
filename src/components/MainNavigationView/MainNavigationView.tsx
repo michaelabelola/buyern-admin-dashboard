@@ -24,9 +24,7 @@ const MainNavigationView: FC<MainNavigationViewProps> = (props) => {
             className={
               "w-10 h-10 duration-300 object-cover object-center rounded-md border-2 border-primary-800 hover:opacity-80"
             }
-            src={
-              "http://127.0.0.1:10000/devstoreaccount1/test/logos/aktionariat-c5784b26234a389632687a36d2fb3258.png"
-            }
+            src={`${process.env.REACT_APP_STORAGE_SERVER}/test/logos/aktionariat-c5784b26234a389632687a36d2fb3258.png`}
             alt={"Buyern"}
           />
         </div>
@@ -56,7 +54,8 @@ const MainNavigationView: FC<MainNavigationViewProps> = (props) => {
             className={
               "w-10 h-10 duration-300 object-cover object-center rounded-md border-2 border-primary-800 hover:opacity-80"
             }
-            src={"http://127.0.0.1:10000/devstoreaccount1/test/profileImages/IMG_7511.JPG"}
+            
+            src={`${process.env.REACT_APP_STORAGE_SERVER}/test/profileImages/IMG_7511.JPG`}
             alt={"Abel Michael"}
           />
         </div>

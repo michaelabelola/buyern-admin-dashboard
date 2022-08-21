@@ -12,6 +12,14 @@ const UsersNavigation: FC<SideNavVisibilityProp> = (props) => {
 
   const match = useMatch(ea.pathname) as any;
   const match2 = useMatch("/:_entityId/users/:_link/*") as any;
+
+  fetch("http://localhost:8010/user?id=6", {
+    method: 'GET',
+    redirect: 'follow'
+  })
+  .then(response => response.text())
+  .then(result => console.log(result))
+  .catch(error => console.log('error', error));
   let getLink: any = () => {
     if (match && match.params && match.params._link) {
       return match.params._link
@@ -20,6 +28,9 @@ const UsersNavigation: FC<SideNavVisibilityProp> = (props) => {
     }
     return null;
   }
+
+
+  
   return (
     <NavigationView isMobile={props.isMobile} sideNavOpenState={props.sideNavOpenState}>
       <div className={"w-full flex flex-col"}>

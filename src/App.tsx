@@ -15,11 +15,13 @@ import LoginPage from './pages/LoginPage/LoginPage';
 import SignUpPage from './pages/SignUpPage/SignUpPage.lazy';
 import ForgotPasswordPage from './pages/LoginPage/ForgotPasswordPage';
 import ResetPasswordPage from './pages/LoginPage/ResetPasswordPage';
+import axios from 'axios';
 const Redirect: FC<{ to: string }> = (props) => {
   return <Navigate to={`/${useParams().entityId + props.to}`} replace />
 }
 
 function App() {
+  axios.defaults.withCredentials = true;
   const [mobile, setMobile] = useState(window.innerWidth < 640 ? true : false);
   const [sideNavOpen, setSideNavOpen] = useState(window.innerWidth < 640 ? false : true);
   // const [windowWidth, setWindowWidth] = useState(undefined as any);

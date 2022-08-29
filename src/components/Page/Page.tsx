@@ -7,7 +7,9 @@ interface PageProps extends SideNavVisibilityProp {
   children?: any;
   noSideNavigation?: boolean;
 }
-
+var da = ()=>{
+  var d$a = 1;
+}
 const Page: FC<PageProps> = (props) => (
 
   <div className={"basis-full h-screen flex gap-0 relative w-screen overflow-x-hidden"}>

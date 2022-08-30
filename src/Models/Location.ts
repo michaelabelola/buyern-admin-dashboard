@@ -73,5 +73,4 @@ interface City {
   flag: true;
   wikiDataId: string;
 }
-
 export type { Location, Country, State, City };

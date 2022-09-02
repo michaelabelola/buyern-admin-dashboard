@@ -20,7 +20,6 @@ const Redirect: FC<{ to: string }> = (props) => {
   return <Navigate to={`/${useParams().entityId + props.to}`} replace />
 }
 
-
 function App() {
   axios.defaults.withCredentials = true;
   const [mobile, setMobile] = useState(window.innerWidth < 640 ? true : false);
